@@ -229,7 +229,7 @@ class CollectionFilesPlugin extends Omeka_Plugin_AbstractPlugin
             $files = $this->get_collection_files($collection);
             echo '<ul>';
             foreach ($files as $file){
-                echo '<li><a href="'.metadata($file, 'uri').'" title ="View File">'.metadata($file,'original_filename').'</li>';
+                echo link_to($file,'show', $file->original_filename);
             }
             echo '</ul>';            
         }
