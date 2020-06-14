@@ -13,6 +13,7 @@ class CollectionFilesPlugin extends Omeka_Plugin_AbstractPlugin
 {
     protected $_elementSetName = 'Monitor';
 
+    private $_files;
     /**
      * @var array Hooks for the plugin.
      */
