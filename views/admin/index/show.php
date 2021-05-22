@@ -85,7 +85,7 @@ $fileTitle = __('File #%s', metadata('collection_files', 'id')) . $fileTitle;
     <?php if ($this->fileId3Metadata($collection_file,array())): ?>
     <div id="id3-metadata" class="panel">
         <h4><?= __('Embedded Metadata'); ?></h4>
-        <?= html_escape($this->fileId3Metadata($collection_file,array())); ?>
+        <?= $this->fileId3Metadata($collection_file,array()); ?>
     </div>
     <?php endif; ?>
 

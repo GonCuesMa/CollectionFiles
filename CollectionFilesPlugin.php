@@ -23,7 +23,10 @@ class CollectionFilesPlugin extends Omeka_Plugin_AbstractPlugin
         'uninstall_message',
         'admin_head',
         'admin_collections_form',
+        'admin_collections_show',
         'admin_collections_show_sidebar',
+        'admin_collections_browse',
+        'admin_collections_browse_each',
         'before_save_collection',
         'after_save_collection',
         'define_routes',
@@ -231,7 +234,7 @@ class CollectionFilesPlugin extends Omeka_Plugin_AbstractPlugin
         <div id="file-list">');
         
         if (!$this->collection_has_files($collection)){ 
-            $this->_p_html('<p>'.__('There are no files for this collection yet.').link_to_collection(__('Add a File'), array(), 'edit').'.</p>'); 
+            $this->_p_html('<p>'.__('There are no files for this collection yet.').link_to_collection(__(' Add a File'), array(), 'edit').'.</p>'); 
         } else {
             $files = $this->get_collection_files($collection); 
             $this->_p_html('<ul>'); 
@@ -242,6 +245,73 @@ class CollectionFilesPlugin extends Omeka_Plugin_AbstractPlugin
             $this->_p_html('</ul>');     
         } 
         $this->_p_html('</div> </div>'); 
+    }
+
+    public function hookAdminCollectionsShow($args){
+        $collection = $args['collection'];
+        if ($this->collection_has_files($collection)){
+            $files = $this->get_collection_files($collection);
+            $this->_p_html('<h2>Collection Files</h2>');
+            foreach ($files as $file){
+                $this->_p_html(file_markup($file));
+            }
+        }
+    }
+
+    public function hookAdminCollectionsBrowseEach($args){
+        $collection = $args['collection'];
+        if ($this->collection_has_files($collection)){
+            $database = get_db();
+            $file = $database->getTable('CollectionFile')->findOneByCollection($collection->id, 0);
+            $format = (get_option('use_square_thumbnail') == 1) ? 'square_thumbnail' : 'thumbnail';
+            if ($file->hasThumbnail()) {
+                $uri = $file->getWebPath($format);
+            } else {
+                $uri = img($this->_getFallbackImage($file));
+            }
+            $attrs = array();
+            $attrs['src'] = $uri;
+            $alt = '';
+            if ($fileTitle = metadata($file, 'display title', array('no_escape' => true))) {
+                $alt = $fileTitle;
+            }
+            $attrs['alt'] = $alt;
+            $attrs['title'] = $alt;
+            $attrs = apply_filters('image_tag_attributes', $attrs, array(
+                'record' => $collection,
+                'file' => $file,
+                'format' => $format,
+            ));
+            $img = '<img ' . tag_attributes($attrs) . '>';
+            $this->_p_html(link_to_collection($img, array('class' => 'image cf')));
+        }
+    }
+
+    protected function _getFallbackImage($file)
+    {
+        $mimeType = $file->mime_type;
+        if (isset(self::$_fallbackImages[$mimeType])) {
+            return self::$_fallbackImages[$mimeType];
+        }
+
+        $mimePrefix = substr($mimeType, 0, strpos($mimeType, '/'));
+        if (isset(self::$_fallbackImages[$mimePrefix])) {
+            return self::$_fallbackImages[$mimePrefix];
+        }
+
+        return self::$_fallbackImages['*'];
+    }
+
+    public function hookadminCollectionsBrowse($args){
+        $this->_p_html('
+            <script type="text/javascript">
+                jQuery(document).ready(function () {
+                    jQuery("td.title a.cf").each(function( index ) {
+                        jQuery(this).closest("td").prepend(jQuery(this));
+                    });
+                });
+            </script>
+        ');
     }
     
     private function _p_html($html){ ?>
