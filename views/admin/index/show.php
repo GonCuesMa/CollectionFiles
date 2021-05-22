@@ -25,7 +25,7 @@ $fileTitle = __('File #%s', metadata('collection_files', 'id')) . $fileTitle;
         <?php if (is_allowed($collection_file, 'edit')): ?>
             <?= link_to($collection_file, 'edit', __('Edit'), array('class'=>'big green button')); ?>
         <?php endif; ?>
-        <a href="<?= html_escape(public_url('collection-files/show/'.metadata('collection_file', 'id'))); ?>" class="big blue button" target="_blank"><?= __('View Public Page'); ?></a>
+        <a href="<?= html_escape(public_url('collection-files/show/'.metadata('collection_file', 'id'))); ?>" class="big blue button" target="_blank" disabled><?= __('View Public Page'); ?></a>
         <?php if (is_allowed($collection_file, 'delete')): ?>
             <?= link_to($collection_file, 'delete-confirm', __('Delete'), array('class' => 'big red button delete-confirm')); ?>
         <?php endif; ?>
