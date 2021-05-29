@@ -27,7 +27,6 @@ class CollectionFilesPlugin extends Omeka_Plugin_AbstractPlugin
         'admin_collections_show_sidebar',
         'admin_collections_browse',
         'admin_collections_browse_each',
-        'before_save_collection',
         'after_save_collection',
         'define_routes',
         'define_acl',
@@ -152,17 +151,6 @@ class CollectionFilesPlugin extends Omeka_Plugin_AbstractPlugin
         return $files;
     }
     
-    public function hookBeforeSaveCollection($args){
-        $collection = $args['record'];
-        try {
-            if ($this->isset_file('collectionfile')){
-                $this->insert_files_for_collection($collection, 'Upload', 'collectionfile', array('ignoreNoFile' => true));
-            }
-        } catch (Omeka_File_Ingest_InvalidException $e) {
-            $collection->addError('File Upload', $e->getMessage());
-        }
-    }
-    
     protected function isset_file($name){
         return empty($name) ? false : isset($_FILES[$name]);
     }
@@ -182,7 +170,16 @@ class CollectionFilesPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function hookAfterSaveCollection($args)
     {
+        $collection = $args['record'];
         $database = get_db();
+        try {
+            if ($this->isset_file('collectionfile')){
+                $this->insert_files_for_collection($collection, 'Upload', 'collectionfile', array('ignoreNoFile' => true));
+            }
+        } catch (Omeka_File_Ingest_InvalidException $e) {
+            $collection->addError('File Upload', $e->getMessage());
+        }
+
         if ($args['post']) {
             $post = $args['post'];
             $collection = $args['record'];
